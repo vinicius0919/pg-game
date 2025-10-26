@@ -11,7 +11,7 @@ class Enemy(Character):
             "right": [f'{name}_run{i:02}' for i in range(25, 32)],
             "down": [f'{name}_run{i:02}' for i in range(1, 9)],
         }
-        super().__init__(name, pos, idle_frames, animations, speed=1)
+        super().__init__(name, pos, idle_frames, animations, speed=1, damage=5, life=50)
         self.following = False
 
     def follow(self, target):

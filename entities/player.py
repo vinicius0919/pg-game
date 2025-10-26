@@ -10,10 +10,15 @@ class Player(Character):
             "left": [f'run{i:02}' for i in range(9, 17)],
             "right": [f'run{i:02}' for i in range(17, 25)],
             "down": [f'run{i:02}' for i in range(25, 33)],
+            "attack_up": [f'attack{i:02}' for i in range(25, 33)],
+            "attack_down": [f'attack{i:02}' for i in range(1, 9)],
+            "attack_left": [f'attack{i:02}' for i in range(9, 17)],
+            "attack_right": [f'attack{i:02}' for i in range(17, 25)],
         }
-        super().__init__("player", pos, idle_frames, animations, speed=5)
+        super().__init__("player", pos, idle_frames, animations, speed=5, damage=15, life=100)
 
     def update(self):
+        super().update()
         moved = False
 
         if keyboard.left or keyboard.a:
@@ -32,7 +37,8 @@ class Player(Character):
             self.actor.y += self.speed
             self.direction = "down"
             moved = True
-
+        if keyboard.space:
+            self.is_attacking = True
         if moved:
             self._animate(self.animations[self.direction])
         else:
