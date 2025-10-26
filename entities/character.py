@@ -7,7 +7,7 @@ HEIGHT = 450
 Y_LIMITS = (156, 380)
 
 class Character:
-    def __init__(self, name, pos, idle_frames, animations, speed=2, damage=10, life=100):
+    def __init__(self, name, pos, idle_frames, animations, speed=2, cooldown_time=1, damage=10, life=100):
         self.name = name
         self.actor = Actor(idle_frames[0], pos=pos)
         self.idle_frames = idle_frames
@@ -19,22 +19,21 @@ class Character:
         self.direction = "idle"
         self.life = life
         self.damage = damage
-        self.cooldown_time = 1  # segundos
+        self.cooldown_time = cooldown_time  # segundos
         self.last_attack_time = 0
         self.is_attacking = False
+        self.is_defending = False
 
     def attack(self, target):
         """Realiza um ataque ao alvo."""
-        if not self.is_attacking and time.time() - self.last_attack_time > self.cooldown_time:
-            self.is_attacking = True
+        if self.is_attacking and time.time() - self.last_attack_time > self.cooldown_time:
             self.last_attack_time = time.time()
             target.take_damage(self.damage)
-            self.is_attacking = False
 
     def take_damage(self, amount):
         """Aplica dano ao personagem."""
         self.life -= amount
-        if self.life < 0:
+        if self.life < 0 and not self.is_defending:
             self.life = 0
 
     def _animate(self, frames):
@@ -47,7 +46,6 @@ class Character:
 
     def update(self):
         """Atualiza a animação idle se nenhum movimento estiver ativo."""
-        #self._animate(self.idle_frames)
         if self.actor.y < Y_LIMITS[0]:
             self.actor.y = Y_LIMITS[0]
         elif self.actor.y > Y_LIMITS[1]:
@@ -57,13 +55,17 @@ class Character:
         elif self.actor.x > WIDTH:
             self.actor.x = WIDTH
         
-        # attack animation must execute even if idle
         if self.is_attacking:
             if self.direction == "idle":
                 self.direction = "down"
-            self._animate(self.animations[f'attack_{self.direction}'])
-            if self.current_frame_index == len(self.animations[f'attack_{self.direction}']) - 1:
-                self.is_attacking = False   
+            attack_frames = self.animations.get(f'attack_{self.direction}', [])
+            if attack_frames:
+                self._animate(attack_frames)
+                if self.current_frame_index == len(attack_frames) - 1:
+                    self.is_attacking = False
+                    self.current_frame_index = 0
+        else:
+            self._animate(self.idle_frames)
 
     def draw(self):
         self.actor.draw()

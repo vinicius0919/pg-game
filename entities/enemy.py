@@ -10,6 +10,10 @@ class Enemy(Character):
             "left": [f'{name}_run{i:02}' for i in range(17, 25)],
             "right": [f'{name}_run{i:02}' for i in range(25, 32)],
             "down": [f'{name}_run{i:02}' for i in range(1, 9)],
+            "attack_down": [f'{name}_attack{i:02}' for i in range(1, 9)],
+            "attack_up": [f'{name}_attack{i:02}' for i in range(9, 17)],
+            "attack_left": [f'{name}_attack{i:02}' for i in range(17, 25)],
+            "attack_right": [f'{name}_attack{i:02}' for i in range(25, 33)],
         }
         super().__init__(name, pos, idle_frames, animations, speed=1, damage=5, life=50)
         self.following = False
@@ -22,7 +26,8 @@ class Enemy(Character):
         self.following = False
 
     def update(self):
-        if self.following:
+        
+        if self.following and not self.is_attacking:
             dx = self.target.actor.x - self.actor.x
             dy = self.target.actor.y - self.actor.y
 
@@ -36,3 +41,4 @@ class Enemy(Character):
             self._animate(self.animations[self.direction])
         else:
             super().update()
+            self._animate(self.idle_frames)
